@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&A Live — Ophta'News 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Josefin+Slab:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --bg:      #060c1a;
+  --surf:    #0f1830;
+  --card:    #141e38;
+  --border:  #1e2d52;
+  --gold:    #c9a84c;
+  --gold2:   #e8cc80;
+  --goldbg:  rgba(201,168,76,.10);
+  --goldbrd: rgba(201,168,76,.25);
+  --green:   #4dd68c;
+  --gbg:     rgba(77,214,140,.10);
+  --red:     #f07070;
+  --rbg:     rgba(240,112,112,.10);
+  --text:    #e8eaf2;
+  --muted:   #5a6a9a;
+  --light:   #a0aece;
+  --serif:   'Josefin Slab', Georgia, serif;
+  --sans:    'Josefin Sans', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);letter-spacing:.03em;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%,rgba(201,168,76,.08) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 30% at 80% 20%,rgba(100,130,220,.06) 0%,transparent 50%)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#0b1228}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+@keyframes fadeUp  {from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes flashIn {0%{opacity:0;transform:scale(.94)}65%{transform:scale(1.015)}100%{opacity:1;transform:scale(1)}}
+@keyframes slideIn {from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes blink   {0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes starFloat{0%,100%{transform:translateY(0);opacity:.6}50%{transform:translateY(-5px);opacity:1}}
+
+.fu{animation:fadeUp .5s ease both}
+.fi{animation:flashIn .45s ease both}
+.si{animation:slideIn .35s ease both}
+.star{display:inline-block;color:var(--gold);animation:starFloat 3s ease infinite}
+.star.s2{animation-delay:.8s;font-size:10px}.star.s3{animation-delay:1.5s;font-size:18px}
+.gold-line{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:20px 0}
+
+.btn{font-family:var(--sans);font-weight:600;border-radius:8px;cursor:pointer;
+  letter-spacing:.08em;white-space:nowrap;transition:all .18s;border:1px solid transparent;
+  text-transform:uppercase}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.btn:active{transform:scale(.97)}
+.btn-lg{padding:14px 28px;font-size:13px}
+.btn-md{padding:10px 20px;font-size:12px}
+.btn-sm{padding:6px 12px;font-size:11px}
+.btn-gold{background:linear-gradient(135deg,#c9a84c,#e8cc80);color:#060c1a;border-color:var(--gold)}
+.btn-gold:hover{box-shadow:0 4px 20px rgba(201,168,76,.35)}
+.btn-outline{background:transparent;color:var(--gold);border-color:var(--goldbrd)}
+.btn-outline:hover{background:var(--goldbg)}
+.btn-green{background:var(--gbg);color:var(--green);border-color:rgba(77,214,140,.3)}
+.btn-red{background:var(--rbg);color:var(--red);border-color:rgba(240,112,112,.3)}
+.btn-ghost{background:var(--card);color:var(--text);border-color:var(--border)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;filter:none}
+
+.inp{background:var(--surf);border:1px solid var(--border);border-radius:9px;
+  padding:12px 15px;color:var(--text);font-family:var(--sans);font-size:14px;
+  letter-spacing:.02em;width:100%;line-height:1.6;transition:border-color .18s}
+.inp::placeholder{color:var(--muted)}.inp:focus{outline:none;border-color:var(--gold)}
+textarea.inp{resize:vertical}
+
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:4px 14px;
+  font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase}
+.badge-gold{background:var(--goldbg);border:1px solid var(--goldbrd);color:var(--gold2)}
+
+.view{display:none}.view.active{display:flex}
+
+/* ── PUBLIC ── */
+#view-public{flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:32px 20px;position:relative;overflow:hidden}
+#view-public::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 50% 40% at 50% 65%,rgba(201,168,76,.05) 0%,transparent 70%)}
+.public-card{width:100%;max-width:480px;position:relative;z-index:1;
+  background:var(--surf);border:1px solid var(--border);border-radius:20px;
+  padding:36px 32px;box-shadow:0 20px 70px rgba(0,0,0,.45)}
+.public-card .top-badge{text-align:center;margin-bottom:22px}
+.public-card h1{font-family:var(--serif);font-size:22px;font-weight:700;text-align:center;
+  margin-bottom:8px;letter-spacing:.05em}
+.public-card .sub{color:var(--light);font-size:13px;text-align:center;margin-bottom:20px;line-height:1.7}
+.form-stack{display:flex;flex-direction:column;gap:12px}
+.char-count{font-size:11px;color:var(--muted);text-align:right;margin-top:-6px}
+#public-success{display:none;text-align:center}
+#public-success .icon{font-size:52px;margin-bottom:14px}
+#public-success h2{font-family:var(--serif);font-size:22px;color:var(--gold2);margin-bottom:8px}
+#public-success p{color:var(--light);font-size:13px;line-height:1.7;margin-bottom:24px}
+
+/* ── ADMIN ── */
+#view-admin{flex-direction:column;min-height:100vh;padding:28px 20px}
+.admin-inner{max-width:760px;margin:0 auto;width:100%}
+.admin-header{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:28px;gap:12px;flex-wrap:wrap}
+.admin-header .kicker{font-size:10px;color:var(--gold);letter-spacing:.2em;
+  text-transform:uppercase;margin-bottom:5px}
+.admin-header h1{font-family:var(--serif);font-size:22px;font-weight:700;
+  color:var(--gold2);letter-spacing:.05em}
+.stats-row{display:flex;gap:10px;margin-bottom:28px}
+.stat-box{flex:1;background:var(--surf);border-radius:12px;padding:14px 16px;border:1px solid var(--border)}
+.stat-box .num{font-size:26px;font-weight:600;font-family:var(--serif)}
+.stat-box .lbl{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.08em;text-transform:uppercase}
+.section+.section{margin-top:28px}
+.section-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.section-dot{width:7px;height:7px;border-radius:50%}
+.section-title{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.section-count{font-size:11px;border-radius:99px;padding:1px 9px;border:1px solid transparent}
+.section-list{display:flex;flex-direction:column;gap:9px}
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;display:flex;gap:12px;align-items:flex-start;transition:border-color .2s}
+.q-card.highlighted{border-color:var(--gold);background:rgba(201,168,76,.04)}
+.q-card .body{flex:1;min-width:0}
+.q-card .qtext{font-size:14px;line-height:1.6;margin-bottom:5px}
+.q-card .meta{font-size:11px;color:var(--muted);letter-spacing:.04em}
+.q-card .acts{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.empty-state{padding:22px 16px;text-align:center;background:var(--surf);
+  border-radius:12px;border:1px dashed var(--border);color:var(--muted);font-size:12px}
+
+/* QR block */
+.qr-block{margin-top:32px;background:var(--surf);border-radius:16px;padding:22px;
+  border:1px solid var(--border);display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+.qr-wrap{background:#fff;padding:8px;border-radius:11px;box-shadow:0 0 0 2px var(--gold)}
+.qr-info{flex:1;min-width:220px}
+.qr-info .kicker{font-size:10px;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px}
+.qr-info h3{font-family:var(--serif);font-size:15px;color:var(--gold2);margin-bottom:6px}
+.qr-info p{font-size:13px;color:var(--light);line-height:1.7}
+.info-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.info-box strong{color:var(--gold2);display:block;margin-bottom:5px;font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase}
+.info-box.secret{background:rgba(201,168,76,.05);border-color:var(--goldbrd)}
+.info-box.secret strong{color:var(--gold)}
+.info-box.secret code{color:var(--light);font-size:11px}
+
+/* URL input row */
+.url-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.url-row .inp{font-size:12px;padding:9px 11px}
+.url-hint{margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6}
+.url-hint a{color:var(--gold2);text-decoration:none}
+
+/* ── STAGE ── */
+#view-stage{flex-direction:column;min-height:100vh;position:relative;overflow:hidden;background:var(--bg);
+  background-image:radial-gradient(ellipse 70% 55% at 50% 35%,rgba(201,168,76,.07) 0%,transparent 65%)}
+.stage-top{display:flex;align-items:center;justify-content:space-between;
+  padding:18px 28px;position:relative;z-index:10;border-bottom:1px solid var(--border)}
+.live-pill{display:flex;align-items:center;gap:6px;background:var(--goldbg);
+  border:1px solid var(--goldbrd);border-radius:99px;padding:5px 14px;
+  font-size:10px;color:var(--gold2);letter-spacing:.15em;text-transform:uppercase;font-weight:600}
+.live-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s ease infinite}
+.stage-center{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:40px 8vw;text-align:center;position:relative;z-index:10}
+.stage-center::before,.stage-center::after{content:'✦';position:absolute;color:var(--gold);opacity:.15;font-size:40px}
+.stage-center::before{top:20px;left:30px}.stage-center::after{bottom:20px;right:30px}
+.q-mark{font-family:var(--serif);font-size:clamp(3rem,8vw,7rem);line-height:1;
+  color:var(--gold);opacity:.22;margin-bottom:-20px}
+#stage-question{font-family:var(--serif);font-size:clamp(1.6rem,3.8vw,3.2rem);font-weight:600;
+  line-height:1.35;color:var(--text);margin-bottom:28px;letter-spacing:.02em}
+#stage-author{display:inline-flex;align-items:center;gap:8px;background:var(--goldbg);
+  border:1px solid var(--goldbrd);border-radius:99px;padding:8px 20px;
+  font-size:13px;color:var(--gold2);letter-spacing:.08em}
+#stage-author .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:blink 1.8s ease infinite}
+#stage-empty{text-align:center;color:var(--muted)}
+#stage-empty .icon{font-size:60px;margin-bottom:16px;opacity:.4}
+#stage-empty .t1{font-family:var(--serif);font-size:18px;color:var(--light)}
+#stage-empty .t2{margin-top:8px;font-size:13px}
+.stage-queue{padding:0 28px 24px;position:relative;z-index:10}
+.stage-queue .qlabel{font-size:10px;color:var(--muted);letter-spacing:.15em;
+  text-transform:uppercase;margin-bottom:10px;font-weight:600}
+.stage-queue .qlist{display:flex;gap:8px;flex-wrap:wrap}
+
+@media(max-width:520px){
+  .public-card{padding:28px 18px}
+  .stats-row{gap:7px}.stat-box .num{font-size:20px}
+  .admin-header{flex-direction:column}
+  .qr-block{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ PUBLIC ══ -->
+<div id="view-public" class="view active">
+  <div class="public-card fu">
+    <div class="top-badge">
+      <span class="badge badge-gold"><span class="star s2">✦</span> Q&A Live · Ophta'News 2026</span>
+    </div>
+
+    <svg onclick="handleLogoTap()" viewBox="0 0 220 56"
+      style="height:46px;margin:0 auto 16px;display:block;cursor:pointer;user-select:none"
+      xmlns="http://www.w3.org/2000/svg">
+      <circle cx="22" cy="28" r="17" fill="none" stroke="#c9a84c" stroke-width="2.2"/>
+      <circle cx="22" cy="28" r="10" fill="none" stroke="#c9a84c" stroke-width="1.4"/>
+      <line x1="5" y1="28" x2="39" y2="28" stroke="#c9a84c" stroke-width="1.4"/>
+      <line x1="22" y1="11" x2="22" y2="45" stroke="#c9a84c" stroke-width="1.4"/>
+      <ellipse cx="22" cy="28" rx="17" ry="9" fill="none" stroke="#c9a84c" stroke-width="1" opacity=".45"/>
+      <text x="48" y="24" font-family="Josefin Slab,Georgia,serif" font-size="15" font-weight="700" fill="#e8cc80" letter-spacing="1">Ophta'News</text>
+      <text x="49" y="41" font-family="Josefin Sans,sans-serif" font-size="8" fill="#5a6a9a" letter-spacing="3">CONGRÈS · NICE 2026</text>
+    </svg>
+
+    <div class="gold-line" style="margin:0 0 18px"></div>
+
+    <div id="public-form">
+      <h1>Posez votre question</h1>
+      <p class="sub">Votre question sera examinée par le modérateur avant d'être affichée sur scène.</p>
+      <div class="form-stack">
+        <textarea id="q-text" class="inp" rows="4" placeholder="Saisissez votre question…" maxlength="300"
+          oninput="document.getElementById('char-count').textContent=this.value.length+'/300';checkSubmit()"></textarea>
+        <div class="char-count"><span id="char-count">0/300</span></div>
+        <input id="q-author" class="inp" placeholder="Votre prénom (optionnel)">
+        <button id="submit-btn" class="btn btn-gold btn-lg" disabled onclick="submitQuestion()">
+          Envoyer ma question →
+        </button>
+      </div>
+    </div>
+
+    <div id="public-success" class="fi">
+      <div class="icon">🎉</div>
+      <h2>Question envoyée !</h2>
+      <p>Elle sera visible dès que le modérateur l'aura approuvée.</p>
+      <button class="btn btn-outline btn-md" onclick="resetForm()">Poser une autre question</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN ══ -->
+<div id="view-admin" class="view">
+  <div class="admin-inner">
+
+    <div class="admin-header fu">
+      <div>
+        <div class="kicker">✦ Modération · Ophta'News 2026</div>
+        <h1>Panneau de contrôle</h1>
+      </div>
+      <button class="btn btn-gold btn-md" onclick="switchView('stage')">🖥&nbsp; Scène</button>
+    </div>
+
+    <div class="stats-row fu" style="animation-delay:.05s">
+      <div class="stat-box">
+        <div class="num" id="stat-pending" style="color:var(--gold)">0</div>
+        <div class="lbl">En attente</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="stat-approved" style="color:var(--green)">0</div>
+        <div class="lbl">Approuvées</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="stat-total" style="color:var(--light)">0</div>
+        <div class="lbl">Total</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <span class="section-dot" style="background:var(--gold)"></span>
+        <span class="section-title">En attente</span>
+        <span class="section-count" id="cnt-pending"
+          style="background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.25);color:var(--gold2)">0</span>
+      </div>
+      <div class="section-list" id="list-pending"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <span class="section-dot" style="background:var(--green)"></span>
+        <span class="section-title">Approuvées</span>
+        <span class="section-count" id="cnt-approved"
+          style="background:rgba(77,214,140,.12);border-color:rgba(77,214,140,.25);color:var(--green)">0</span>
+      </div>
+      <div class="section-list" id="list-approved"></div>
+    </div>
+
+    <!-- QR block -->
+    <div class="qr-block fu" style="animation-delay:.12s">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+        <div class="qr-wrap">
+          <div id="qr-canvas" style="width:150px;height:150px;display:flex;align-items:center;justify-content:center">
+            <span style="font-size:11px;color:#aaa;text-align:center;padding:10px">Collez une URL →</span>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="downloadQR()" style="width:150px">⬇ Télécharger</button>
+      </div>
+      <div class="qr-info">
+        <div class="kicker">✦ QR Code participants</div>
+        <h3>Configurez votre QR code</h3>
+        <p style="margin-bottom:14px">Hébergez le fichier en ligne, collez l'URL ici — le QR se génère automatiquement.</p>
+
+        <div class="info-box" style="margin-bottom:10px">
+          <strong>🔗 URL à encoder</strong>
+          <div class="url-row">
+            <input id="qr-url-input" class="inp" placeholder="https://monsite.com/qa.html"
+              oninput="scheduleQR(this.value)" onkeydown="if(event.key==='Enter')generateQR()">
+            <button class="btn btn-gold btn-sm" onclick="generateQR()">OK</button>
+          </div>
+          <div class="url-hint">
+            💡 Hébergement gratuit : <a href="https://app.netlify.com/drop" target="_blank">netlify.com/drop</a>
+            ou <a href="https://tiiny.host" target="_blank">tiiny.host</a>
+            — glissez le fichier, copiez l'URL.
+          </div>
+        </div>
+
+        <div class="info-box secret">
+          <strong>🔒 Accès modération</strong>
+          <code style="color:var(--light);font-size:11px">Double-clic sur le logo Ophta'News depuis la page participant</code>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ STAGE ══ -->
+<div id="view-stage" class="view">
+  <div class="stage-top">
+    <svg viewBox="0 0 200 50" style="height:24px" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="25" r="15" fill="none" stroke="#c9a84c" stroke-width="2"/>
+      <circle cx="20" cy="25" r="9" fill="none" stroke="#c9a84c" stroke-width="1.3"/>
+      <line x1="5" y1="25" x2="35" y2="25" stroke="#c9a84c" stroke-width="1.3"/>
+      <line x1="20" y1="10" x2="20" y2="40" stroke="#c9a84c" stroke-width="1.3"/>
+      <ellipse cx="20" cy="25" rx="15" ry="8" fill="none" stroke="#c9a84c" stroke-width=".9" opacity=".45"/>
+      <text x="44" y="21" font-family="Josefin Slab,Georgia,serif" font-size="13" font-weight="700" fill="#e8cc80" letter-spacing="1">Ophta'News</text>
+      <text x="45" y="36" font-family="Josefin Sans,sans-serif" font-size="7" fill="#5a6a9a" letter-spacing="2">CONGRÈS 2026</text>
+    </svg>
+    <div class="live-pill"><span class="dot"></span>Q&amp;A Live</div>
+    <div style="display:flex;gap:8px">
+      <button id="btn-clear" class="btn btn-ghost btn-sm" onclick="clearHighlight()" style="display:none">Effacer</button>
+      <button class="btn btn-outline btn-sm" onclick="switchView('admin')">← Modération</button>
+    </div>
+  </div>
+
+  <div class="stage-center">
+    <div id="stage-live" style="display:none">
+      <div class="q-mark">"</div>
+      <div id="stage-question"></div>
+      <div id="stage-author"><span class="dot"></span><span id="stage-author-name"></span></div>
+    </div>
+    <div id="stage-empty">
+      <div class="icon">💬</div>
+      <div class="t1">Aucune question sélectionnée</div>
+      <div class="t2">Choisissez une question dans la liste ci-dessous</div>
+    </div>
+  </div>
+
+  <div class="stage-queue" id="stage-queue" style="display:none">
+    <div class="qlabel">✦ Questions approuvées</div>
+    <div class="qlist" id="stage-qlist"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+const ADMIN_CODE = 'ophta2026';
+// ══════════════════════════════════════════
+
+const LS_KEY = 'qa_ophtanews_v3';
+let highlightedId = null;
+let currentView   = 'public';
+let adminUnlocked = false;
+
+function getQ(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]')}catch{return[]}}
+function saveQ(qs){
+  localStorage.setItem(LS_KEY,JSON.stringify(qs));
+  try{bc.postMessage({type:'update'})}catch{}
+}
+let bc;
+try{bc=new BroadcastChannel('qa_ophta3');bc.onmessage=()=>render()}catch{}
+
+// ─── Double-clic logo ─────────────────────
+let tapCount=0,tapTimer=null;
+function handleLogoTap(){
+  tapCount++;
+  clearTimeout(tapTimer);
+  tapTimer=setTimeout(()=>{tapCount=0},600);
+  if(tapCount>=2){tapCount=0;promptAdminCode()}
+}
+function promptAdminCode(){
+  const code=prompt('🔒 Code modérateur :');
+  if(code===null)return;
+  if(code===ADMIN_CODE){adminUnlocked=true;switchView('admin')}
+  else{alert('Code incorrect.')}
+}
+
+// ─── Views ───────────────────────────────
+function switchView(v){
+  if((v==='admin'||v==='stage')&&!adminUnlocked)return;
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  currentView=v;
+  if(v==='admin')renderAdmin();
+  if(v==='stage')renderStage();
+}
+
+// ─── Submit ───────────────────────────────
+function checkSubmit(){
+  document.getElementById('submit-btn').disabled=
+    !document.getElementById('q-text').value.trim();
+}
+function submitQuestion(){
+  const text=document.getElementById('q-text').value.trim();
+  const author=document.getElementById('q-author').value.trim();
+  if(!text)return;
+  const qs=getQ();
+  qs.unshift({id:Date.now(),text,author:author||'Anonyme',
+    status:'pending',ts:new Date().toISOString()});
+  saveQ(qs);
+  document.getElementById('public-form').style.display='none';
+  const s=document.getElementById('public-success');
+  s.style.display='block';
+  s.classList.remove('fi');void s.offsetWidth;s.classList.add('fi');
+}
+function resetForm(){
+  document.getElementById('q-text').value='';
+  document.getElementById('q-author').value='';
+  document.getElementById('char-count').textContent='0/300';
+  document.getElementById('submit-btn').disabled=true;
+  document.getElementById('public-success').style.display='none';
+  document.getElementById('public-form').style.display='block';
+}
+
+// ─── Moderation ───────────────────────────
+function approve(id){saveQ(getQ().map(q=>q.id===id?{...q,status:'approved'}:q));render()}
+function reject(id) {saveQ(getQ().map(q=>q.id===id?{...q,status:'rejected'}:q));render()}
+function remove(id) {
+  saveQ(getQ().filter(q=>q.id!==id));
+  if(highlightedId===id)highlightedId=null;
+  render();
+}
+function highlight(id){
+  highlightedId=highlightedId===id?null:id;
+  document.getElementById('btn-clear').style.display=highlightedId?'':'none';
+  switchView('stage');
+}
+function clearHighlight(){
+  highlightedId=null;
+  document.getElementById('btn-clear').style.display='none';
+  renderStage();
+}
+
+// ─── Render ───────────────────────────────
+function render(){
+  if(currentView==='admin')renderAdmin();
+  if(currentView==='stage')renderStage();
+}
+function renderAdmin(){
+  const qs=getQ();
+  const pending=qs.filter(q=>q.status==='pending');
+  const approved=qs.filter(q=>q.status==='approved');
+  document.getElementById('stat-pending').textContent=pending.length;
+  document.getElementById('stat-approved').textContent=approved.length;
+  document.getElementById('stat-total').textContent=qs.length;
+  document.getElementById('cnt-pending').textContent=pending.length;
+  document.getElementById('cnt-approved').textContent=approved.length;
+  document.getElementById('list-pending').innerHTML=pending.length===0
+    ?'<div class="empty-state">Aucune question en attente</div>'
+    :pending.map((q,i)=>qCard(q,i,[
+        `<button class="btn btn-green btn-sm" onclick="approve(${q.id})">✓ Approuver</button>`,
+        `<button class="btn btn-red btn-sm" onclick="reject(${q.id})">✕ Rejeter</button>`,
+      ])).join('');
+  document.getElementById('list-approved').innerHTML=approved.length===0
+    ?'<div class="empty-state">Aucune question approuvée</div>'
+    :approved.map((q,i)=>{
+        const live=highlightedId===q.id;
+        return qCard(q,i,[
+          `<button class="btn ${live?'btn-gold':'btn-outline'} btn-sm" onclick="highlight(${q.id})">${live?"▶ À l'écran":"▷ Afficher"}</button>`,
+          `<button class="btn btn-red btn-sm" onclick="remove(${q.id})">🗑</button>`,
+        ],live);
+      }).join('');
+}
+function qCard(q,i,actions,highlighted=false){
+  const t=new Date(q.ts).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  return `<div class="q-card si ${highlighted?'highlighted':''}" style="animation-delay:${i*.05}s">
+    <div class="body"><p class="qtext">${esc(q.text)}</p>
+    <span class="meta">${esc(q.author)} · ${t}</span></div>
+    <div class="acts">${actions.join('')}</div>
+  </div>`;
+}
+function renderStage(){
+  const qs=getQ();
+  const approved=qs.filter(q=>q.status==='approved');
+  const liveQ=qs.find(q=>q.id===highlightedId);
+  const liveEl=document.getElementById('stage-live');
+  const emptyEl=document.getElementById('stage-empty');
+  if(liveQ){
+    liveEl.style.display='block';emptyEl.style.display='none';
+    liveEl.classList.remove('fi');void liveEl.offsetWidth;liveEl.classList.add('fi');
+    document.getElementById('stage-question').textContent=liveQ.text;
+    document.getElementById('stage-author-name').textContent=liveQ.author;
+  }else{liveEl.style.display='none';emptyEl.style.display='block'}
+  const queue=document.getElementById('stage-queue');
+  if(approved.length>0){
+    queue.style.display='';
+    document.getElementById('stage-qlist').innerHTML=approved.map(q=>{
+      const live=q.id===highlightedId;
+      return `<button class="btn ${live?'btn-gold':'btn-outline'} btn-sm"
+        onclick="highlightStage(${q.id})"
+        style="max-width:220px;overflow:hidden;text-overflow:ellipsis">
+        ${live?'▶ ':''}${esc(q.text)}</button>`;
+    }).join('');
+  }else{queue.style.display='none'}
+}
+function highlightStage(id){
+  highlightedId=highlightedId===id?null:id;
+  document.getElementById('btn-clear').style.display=highlightedId?'':'none';
+  renderStage();
+}
+
+// ─── QR Code ──────────────────────────────
+let _qrObj=null, _qrTimer=null;
+function scheduleQR(val){
+  clearTimeout(_qrTimer);
+  if(val.trim())_qrTimer=setTimeout(()=>generateQR(),800);
+}
+function generateQR(){
+  const url=(document.getElementById('qr-url-input').value||'').trim();
+  if(!url)return;
+  const el=document.getElementById('qr-canvas');
+  el.innerHTML='';
+  if(typeof QRCode==='undefined'){
+    el.innerHTML='<div style="padding:12px;font-size:11px;color:#aaa;text-align:center">qrcode.js non chargé<br>(vérifiez votre connexion)</div>';
+    return;
+  }
+  try{
+    _qrObj=new QRCode(el,{
+      text:url, width:150, height:150,
+      colorDark:'#060c1a', colorLight:'#ffffff',
+      correctLevel:QRCode.CorrectLevel.M
+    });
+    // qrcode.js génère un canvas + une img — on garde uniquement le canvas
+    setTimeout(()=>{
+      const img=el.querySelector('img');
+      if(img)img.style.display='none';
+      const canvas=el.querySelector('canvas');
+      if(canvas){ canvas.style.display='block'; canvas.style.borderRadius='4px'; }
+    },80);
+  }catch(e){
+    el.innerHTML='<div style="padding:12px;font-size:11px;color:#f07070;text-align:center">URL invalide</div>';
+  }
+}
+function downloadQR(){
+  const el=document.getElementById('qr-canvas');
+  const canvas=el.querySelector('canvas');
+  if(!canvas){alert('Générez d\'abord un QR code.');return}
+  const a=document.createElement('a');
+  a.download='qr-ophtanews.png';
+  a.href=canvas.toDataURL('image/png');
+  a.click();
+}
+
+function esc(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+          .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Init ─────────────────────────────────
+switchView('public');
+setInterval(render,3000);
+</script>
+</body>
+</html>
