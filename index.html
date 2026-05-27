@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Q&A Live — Ophta'News 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <!-- Firebase -->
 <script type="module">
  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -340,39 +339,6 @@ body[data-view="admin"] #btn-back-public { display: block }
  <div class="section-list" id="list-rejected" style="display:none"></div>
  </div>
 
- <!-- QR block -->
- <div class="qr-block fu" style="animation-delay:.12s">
- <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
- <div class="qr-wrap">
- <div id="qr-canvas" style="width:150px;height:150px;display:flex;align-items:center;justify-content:center">
- <span style="font-size:11px;color:#aaa;text-align:center;padding:10px">Collez une URL →</span>
- </div>
- </div>
- <button class="btn btn-outline btn-sm" onclick="downloadQR()" style="width:150px"> Télécharger</button>
- </div>
- <div class="qr-info" style="flex:1;min-width:220px">
- <div class="kicker"> QR Code participants</div>
- <h3>Configurez votre QR code</h3>
- <p>Collez l'URL de votre site hébergé — le QR se génère automatiquement.</p>
- <div class="info-box">
- <strong> URL à encoder</strong>
- <div class="url-row">
- <input id="qr-url-input" class="inp" placeholder="https://theocrv.github.io/qa/"
- oninput="scheduleQR(this.value)" onkeydown="if(event.key==='Enter')generateQR()">
- <button class="btn btn-gold btn-sm" onclick="generateQR()">OK</button>
- </div>
- </div>
- <div class="info-box secret">
- <strong> Accès modération</strong>
- <code style="color:var(--light);font-size:11px">Double-clic sur le logo Ophta'News</code>
- </div>
- </div>
- </div>
-
- 
- </div>
-</div>
-
 <!-- STAGE -->
 <div id="view-stage" class="view">
  <div class="stage-top">
@@ -616,39 +582,7 @@ function highlightStage(id){
  renderStage();
 }
 
-// QR Code 
-let _qrTimer = null;
-function scheduleQR(val){
- clearTimeout(_qrTimer);
- if(val.trim()) _qrTimer = setTimeout(generateQR, 800);
-}
-function generateQR(){
- const url = (document.getElementById('qr-url-input').value||'').trim();
- if(!url) return;
- const el = document.getElementById('qr-canvas');
- el.innerHTML = '';
- if(typeof QRCode === 'undefined'){
- el.innerHTML = '<div style="padding:12px;font-size:11px;color:#aaa;text-align:center">qrcode.js non chargé</div>';
- return;
- }
- try {
- new QRCode(el, { text:url, width:150, height:150, colorDark:'#060c1a', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M });
- setTimeout(() => {
- const img = el.querySelector('img'); if(img) img.style.display = 'none';
- const c = el.querySelector('canvas'); if(c){ c.style.display='block'; c.style.borderRadius='4px'; }
- }, 80);
- } catch(e) {
- el.innerHTML = '<div style="padding:12px;font-size:11px;color:#f07070;text-align:center">URL invalide</div>';
- }
-}
-function downloadQR(){
- const canvas = document.querySelector('#qr-canvas canvas');
- if(!canvas){ alert('Générez d\'abord un QR code.'); return; }
- const a = document.createElement('a');
- a.download = 'qr-ophtanews.png';
- a.href = canvas.toDataURL('image/png');
- a.click();
-}
+
 
 function esc(s){
  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
