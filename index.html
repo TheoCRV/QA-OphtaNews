@@ -173,8 +173,8 @@ textarea.inp { resize:vertical }
       <p style="color:var(--light);font-size:13px;line-height:1.7;margin-bottom:24px">Elle sera visible dès que le modérateur l'aura approuvée.</p>
       <button class="btn btn-outline btn-md" onclick="resetForm()">Poser une autre question</button>
     </div>
-    <p class="footer-txt" style="margin-top:20px">Powered by FMC</p>
   </div>
+  <p class="footer-txt" style="padding:12px 0">Powered by FMC</p>
 </div>
 
 <!-- ADMIN -->
@@ -425,10 +425,11 @@ function esc(s){
 // Init
 document.body.style.overflow = 'hidden';
 document.documentElement.style.overflow = 'hidden';
+document.body.setAttribute('data-view', 'public');
 document.getElementById('salle-label').textContent = _salle;
 
-if(_params.get('scene')=== '1'){ adminUnlocked=true; switchView('stage'); }
-else if(sessionStorage.getItem('qa_admin')=== '1'){ adminUnlocked=true; switchView('admin'); const b=document.getElementById('btn-back-public'); if(b) b.style.display='block';}
+if(_params.get('scene') === '1'){ adminUnlocked=true; switchView('stage'); }
+else if(sessionStorage.getItem('qa_admin') === '1'){ adminUnlocked=true; switchView('admin'); }
 else { switchView('public'); }
 </script>
 </body>
