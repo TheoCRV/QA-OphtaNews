@@ -171,6 +171,9 @@ textarea.inp{resize:vertical}
 
 
 
+
+#btn-back-public { display: none }
+body[data-view="admin"] #btn-back-public { display: block }
 /* Bouton supprimer */
 .btn-delete {
   background: none;
@@ -454,9 +457,7 @@ function switchView(v){
  document.documentElement.style.overflow = (v==='public') ? 'hidden' : '';
  if(v==='admin') sessionStorage.setItem('qa_admin','1');
  if(v==='public') sessionStorage.removeItem('qa_admin');
- // Bouton retour visible uniquement sur admin
- const btnBack = document.getElementById('btn-back-public');
- if(btnBack) btnBack.style.display = (v==='admin') ? 'block' : 'none';
+ document.body.setAttribute('data-view', v);
  if(v==='admin') renderAdmin();
  if(v==='stage') renderStage();
 }
@@ -690,7 +691,7 @@ setTimeout(() => {
 
 <!-- Footer fixe -->
 <div style="position:fixed;bottom:0;left:0;right:0;z-index:100;pointer-events:none">
-  <div id="btn-back-public" style="display:none;text-align:center;padding:6px;pointer-events:all">
+  <div id="btn-back-public" style="text-align:center;padding:6px;pointer-events:all">
     <button onclick="sessionStorage.removeItem('qa_admin');switchView('public')"
       style="background:var(--card);border:1px solid var(--border);color:var(--muted);
       font-family:var(--sans);font-size:11px;letter-spacing:.08em;padding:7px 16px;
