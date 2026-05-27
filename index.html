@@ -46,6 +46,18 @@ body { background: var(--bg); color: var(--text); font-family: var(--sans); lett
 @keyframes flashIn { 0%{opacity:0;transform:scale(.94)} 65%{transform:scale(1.015)} 100%{opacity:1;transform:scale(1)} }
 @keyframes slideIn { from { opacity:0; transform:translateX(-10px) } to { opacity:1; transform:translateX(0) } }
 @keyframes blink   { 0%,100%{opacity:1} 50%{opacity:.2} }
+@keyframes stingerIn  { from{transform:translateX(-100%)} to{transform:translateX(0)} }
+@keyframes stingerOut { from{transform:translateX(0)} to{transform:translateX(100%)} }
+.stinger {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999;
+  background: linear-gradient(105deg, #F7CD18 0%, #fff8c0 50%, #F7CD18 100%);
+  transform: translateX(-100%);
+  pointer-events: none;
+  clip-path: inset(0 0 0 0);
+}
+.stinger.in  { animation: stingerIn  .35s cubic-bezier(0.7,0,0.3,1) both; }
+.stinger.out { animation: stingerOut .35s cubic-bezier(0.7,0,0.3,1) both; }
+
 .fu { animation: fadeUp .5s ease both }
 .fi { animation: flashIn .45s ease both }
 .si { animation: slideIn .35s ease both }
@@ -122,9 +134,9 @@ textarea.inp { resize:vertical }
 #view-stage { flex-direction:column; min-height:100vh; background:var(--bg); }
 .stage-top { display:flex; align-items:center; justify-content:space-between;
   padding:14px 20px; border-bottom:1px solid var(--border); z-index:10; }
-.live-pill { display:flex; align-items:center; gap:6px; background:var(--goldbg);
-  border:1px solid var(--goldbrd); border-radius:99px; padding:5px 14px;
-  font-size:10px; color:var(--gold2); letter-spacing:.15em; text-transform:uppercase; font-weight:600; }
+.live-pill { display:inline-flex; align-items:center; gap:6px; background:var(--goldbg);
+  border:1px solid var(--goldbrd); border-radius:99px; padding:5px 12px;
+  font-size:10px; color:var(--gold2); letter-spacing:.05em; text-transform:uppercase; font-weight:600; white-space:nowrap; }
 .live-pill .dot { width:6px; height:6px; border-radius:50%; background:var(--gold); animation:blink 2s ease infinite; }
 .stage-center { flex:1; display:flex; flex-direction:column; align-items:center;
   justify-content:center; padding:40px 8vw; text-align:center; }
@@ -232,7 +244,6 @@ textarea.inp { resize:vertical }
     </div>
   </div>
 
-  <p class="footer-txt">Powered by FMC</p>
 </div>
 
 <!-- Footer fixe -->
@@ -399,19 +410,59 @@ function qCard(q, i, actions, highlighted=false){
   </div>`;
 }
 
+let _stingerRunning = false;
+let _lastHighlightedId = null;
 function renderStage(){
   const qs     = window._questions;
   const liveQ  = qs.find(q=>q.id===window.highlightedId);
   const liveEl = document.getElementById('stage-live');
   const emptyEl= document.getElementById('stage-empty');
   if(!liveEl || !emptyEl) return;
-  if(liveQ){
-    liveEl.style.display  = 'block'; emptyEl.style.display = 'none';
-    liveEl.classList.remove('fi'); void liveEl.offsetWidth; liveEl.classList.add('fi');
-    document.getElementById('stage-question').textContent = liveQ.text;
-  } else {
-    liveEl.style.display  = 'none'; emptyEl.style.display = 'block';
+
+  // Pas de stinger si on efface juste
+  if(!liveQ){
+    _lastHighlightedId = null;
+    liveEl.style.display  = 'none';
+    emptyEl.style.display = 'block';
+    return;
   }
+
+  // Pas de stinger si c'est le même highlightedId qu'avant
+  if(window.highlightedId === _lastHighlightedId){
+    document.getElementById('stage-question').textContent = liveQ.text;
+    liveEl.style.display  = 'block';
+    emptyEl.style.display = 'none';
+    return;
+  }
+
+  // Stinger uniquement si la question affichée change
+  _lastHighlightedId = window.highlightedId;
+
+  // Stinger
+  if(_stingerRunning) return;
+  _stingerRunning = true;
+  const s = document.getElementById('stinger');
+
+  // Calculer la hauteur du header pour le stinger
+  const stageTop = document.querySelector('.stage-top');
+  const topH = stageTop ? stageTop.getBoundingClientRect().bottom : 0;
+  s.style.clipPath = `inset(${topH}px 0 0 0)`;
+
+  // Phase 1 : wipe IN (cache l'écran)
+  s.className = 'stinger in';
+  setTimeout(()=>{
+    // Mettre à jour le contenu pendant que l'écran est masqué
+    document.getElementById('stage-question').textContent = liveQ.text;
+    liveEl.style.display  = 'block';
+    emptyEl.style.display = 'none';
+
+    // Phase 2 : wipe OUT (révèle la nouvelle question)
+    s.className = 'stinger out';
+    setTimeout(()=>{
+      s.className = 'stinger';
+      _stingerRunning = false;
+    }, 380);
+  }, 370);
 }
 
 function esc(s){
@@ -428,5 +479,8 @@ if(_params.get('scene') === '1'){ adminUnlocked=true; switchView('stage'); }
 else if(sessionStorage.getItem('qa_admin') === '1'){ adminUnlocked=true; switchView('admin'); }
 else { switchView('public'); }
 </script>
+<!-- Stinger -->
+<div id="stinger" class="stinger"></div>
+
 </body>
 </html>
