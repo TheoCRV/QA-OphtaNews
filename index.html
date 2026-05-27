@@ -167,37 +167,23 @@ textarea.inp{resize:vertical}
  border-radius:12px;border:1px dashed var(--border);color:var(--muted);font-size:12px}
 
 
-/* ── Swipe to delete ── */
-.q-card-wrap {
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  margin-bottom: 0;
-}
-.q-card-delete-bg {
-  position: absolute;
-  right: 0; top: 0; bottom: 0;
-  width: 80px;
-  background: var(--rbg);
-  border: 1px solid rgba(240,112,112,.3);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--red);
-  font-size: 18px;
+
+
+/* Bouton supprimer */
+.btn-delete {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 20px;
   font-weight: 300;
-  pointer-events: none;
-  z-index: 0;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: color .15s, background .15s;
+  flex-shrink: 0;
 }
-.q-card {
-  position: relative;
-  touch-action: pan-y;
-  transition: transform .2s ease;
-  cursor: grab;
-  z-index: 1;
-}
-.q-card.swiping { transition: none }
+.btn-delete:hover { color: var(--red); background: var(--rbg); }
 /* Stat tabs */
 .stat-box{flex:1;background:var(--surf);border-radius:12px;padding:14px 16px;border:1px solid var(--border)}
 .stat-tab{cursor:pointer;font-family:var(--sans);text-align:center;transition:all .2s;
@@ -590,18 +576,12 @@ function renderAdmin(){
 
 function qCard(q, i, actions, highlighted=false){
   const t = new Date(q.ts).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-  return `<div class="q-card-wrap">
-    <div class="q-card-delete-bg">✕</div>
-    <div class="q-card si ${highlighted?'highlighted':''}"
-      data-id="${q.id}"
-      ontouchstart="swipeStart(event,this)"
-      ontouchmove="swipeMove(event,this)"
-      ontouchend="swipeEnd(event,this,'${q.id}')"
-      onmousedown="mouseSwipeStart(event,this)"
-      style="animation-delay:${i*.05}s">
-      <div class="body"><p class="qtext">${esc(q.text)}</p>
-      <span class="meta">${esc(q.author)} · ${t}</span></div>
-      <div class="acts">${actions.join('')}</div>
+  return `<div class="q-card si ${highlighted?'highlighted':''}" style="animation-delay:${i*.05}s">
+    <div class="body"><p class="qtext">${esc(q.text)}</p>
+    <span class="meta">${esc(q.author)} · ${t}</span></div>
+    <div class="acts">
+      ${actions.join('')}
+      <button class="btn-delete" onclick="removeQ('${q.id}')" title="Supprimer">×</button>
     </div>
   </div>`;
 }
@@ -669,64 +649,7 @@ function esc(s){
  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Swipe to delete
-let _swipeStartX = 0;
-
-function swipeStart(e, el){
-  _swipeStartX = e.touches[0].clientX;
-  el.classList.add('swiping');
-}
-function swipeMove(e, el){
-  const dx = e.touches[0].clientX - _swipeStartX;
-  if(dx < 0) el.style.transform = `translateX(${Math.max(dx, -80)}px)`;
-}
-function swipeEnd(e, el, id){
-  el.classList.remove('swiping');
-  const dx = e.changedTouches[0].clientX - _swipeStartX;
-  if(dx < -60) confirmDelete(el, id);
-  else el.style.transform = 'translateX(0)';
-}
-
-// Mouse drag (desktop) — seulement si glissement horizontal significatif
-function mouseSwipeStart(e, el){
-  if(e.target.closest('button')) return;
-  const startX = e.clientX;
-  const startY = e.clientY;
-  let dragging = false;
-
-  function onMove(ev){
-    const dx = ev.clientX - startX;
-    const dy = ev.clientY - startY;
-    // Ne déclenche que si mouvement horizontal > vertical
-    if(!dragging && Math.abs(dx) < 8) return;
-    if(!dragging && Math.abs(dy) > Math.abs(dx)) return; // scroll vertical prioritaire
-    dragging = true;
-    ev.preventDefault();
-    el.classList.add('swiping');
-    if(dx < 0) el.style.transform = `translateX(${Math.max(dx, -80)}px)`;
-  }
-  function onUp(ev){
-    if(dragging){
-      el.classList.remove('swiping');
-      const dx = ev.clientX - startX;
-      if(dx < -60) confirmDelete(el, el.dataset.id);
-      else el.style.transform = 'translateX(0)';
-    }
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup', onUp);
-  }
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onUp);
-}
-
-function confirmDelete(el, id){
-  el.style.transform = 'translateX(-80px)';
-  setTimeout(()=>{
-    el.style.transition = 'transform .3s, opacity .3s';
-    el.style.transform = 'translateX(-120%)';
-    el.style.opacity = '0';
-    setTimeout(()=> removeQ(id), 300);
-  }, 600);
+, 600);
 }
 
 
