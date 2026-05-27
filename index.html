@@ -674,6 +674,9 @@ if(_params.get('scene') === '1'){
  // Restaurer la vue admin après refresh
  adminUnlocked = true;
  switchView('admin');
+ // S'assurer que le bouton retour est visible
+ const btnBack = document.getElementById('btn-back-public');
+ if(btnBack) btnBack.style.display = 'block';
 } else {
  switchView('public');
 }
