@@ -452,9 +452,11 @@ function switchView(v){
  currentView = v;
  document.body.style.overflow = (v==='public') ? 'hidden' : '';
  document.documentElement.style.overflow = (v==='public') ? 'hidden' : '';
- // Mémoriser si on est en mode admin
  if(v==='admin') sessionStorage.setItem('qa_admin','1');
  if(v==='public') sessionStorage.removeItem('qa_admin');
+ // Bouton retour visible uniquement sur admin
+ const btnBack = document.getElementById('btn-back-public');
+ if(btnBack) btnBack.style.display = (v==='admin') ? 'block' : 'none';
  if(v==='admin') renderAdmin();
  if(v==='stage') renderStage();
 }
@@ -682,5 +684,20 @@ setTimeout(() => {
  if(dot) dot.classList.add('off');
 }, 100);
 </script>
+
+<!-- Footer fixe -->
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:100;pointer-events:none">
+  <div id="btn-back-public" style="display:none;text-align:center;padding:6px;pointer-events:all">
+    <button onclick="sessionStorage.removeItem('qa_admin');switchView('public')"
+      style="background:var(--card);border:1px solid var(--border);color:var(--muted);
+      font-family:var(--sans);font-size:11px;letter-spacing:.08em;padding:7px 16px;
+      border-radius:8px;cursor:pointer;text-transform:uppercase">
+      ← Page question
+    </button>
+  </div>
+  <div style="text-align:center;padding:6px 0 8px;font-size:10px;
+    color:rgba(255,255,255,.25);letter-spacing:.15em;text-transform:uppercase;
+    font-family:var(--sans)">Powered by FMC</div>
+</div>
 </body>
 </html>
