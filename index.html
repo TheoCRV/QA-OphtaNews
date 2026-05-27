@@ -570,31 +570,38 @@ function renderAdmin(){
  ])).join('');
 
  document.getElementById('list-approved').innerHTML = approved.length === 0
- ? '<div class="empty-state">Aucune question approuvée</div>'
- : approved.map((q,i) => {
- const live = highlightedId === q.id;
- return qCard(q, i, [
- `<button class="btn ${live?'btn-gold':'btn-outline'} btn-sm" onclick="highlight('${q.id}')">${live ? " À l'écran" : " Afficher"}</button>`,
- `<button class="btn btn-red btn-sm" onclick="setStatus('${q.id}','rejected')"></button>`,
- `<button class="btn btn-red btn-sm" onclick="removeQ('${q.id}')"></button>`,
- ], live);
- }).join('');
+    ? '<div class="empty-state">Aucune question approuvée</div>'
+    : approved.map((q,i) => {
+        const live = highlightedId === q.id;
+        return qCard(q, i, [
+          `<button class="btn ${live?'btn-gold':'btn-outline'} btn-sm" onclick="highlight('${q.id}')">${live ? "À l'écran" : "Afficher"}</button>`,
+          `<button class="btn btn-red btn-sm" onclick="setStatus('${q.id}','rejected')">Rejeter</button>`,
+        ], live);
+      }).join('');
 
- document.getElementById('list-rejected').innerHTML = rejected.length === 0
- ? '<div class="empty-state">Aucune question rejetée</div>'
- : rejected.map((q,i) => qCard(q, i, [
- `<button class="btn btn-green btn-sm" onclick="setStatus('${q.id}','approved')">↩ Restaurer</button>`,
- `<button class="btn btn-red btn-sm" onclick="removeQ('${q.id}')"></button>`,
- ])).join('');
+  document.getElementById('list-rejected').innerHTML = rejected.length === 0
+    ? '<div class="empty-state">Aucune question rejetée</div>'
+    : rejected.map((q,i) => qCard(q, i, [
+        `<button class="btn btn-green btn-sm" onclick="setStatus('${q.id}','approved')">Approuver</button>`,
+      ])).join('');
 }
 
 function qCard(q, i, actions, highlighted=false){
- const t = new Date(q.ts).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
- return `<div class="q-card si ${highlighted?'highlighted':''}" style="animation-delay:${i*.05}s">
- <div class="body"><p class="qtext">${esc(q.text)}</p>
- <span class="meta">${esc(q.author)} · ${t}</span></div>
- <div class="acts">${actions.join('')}</div>
- </div>`;
+  const t = new Date(q.ts).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  return `<div class="q-card-wrap">
+    <div class="q-card-delete-bg">✕</div>
+    <div class="q-card si ${highlighted?'highlighted':''}"
+      data-id="${q.id}"
+      ontouchstart="swipeStart(event,this)"
+      ontouchmove="swipeMove(event,this)"
+      ontouchend="swipeEnd(event,this,'${q.id}')"
+      onmousedown="mouseSwipeStart(event,this)"
+      style="animation-delay:${i*.05}s">
+      <div class="body"><p class="qtext">${esc(q.text)}</p>
+      <span class="meta">${esc(q.author)} · ${t}</span></div>
+      <div class="acts">${actions.join('')}</div>
+    </div>
+  </div>`;
 }
 
 // Render stage 
@@ -658,6 +665,55 @@ function downloadQR(){
 
 function esc(s){
  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Swipe to delete
+let _swipeStartX = 0;
+
+function swipeStart(e, el){
+  _swipeStartX = e.touches[0].clientX;
+  el.classList.add('swiping');
+}
+function swipeMove(e, el){
+  const dx = e.touches[0].clientX - _swipeStartX;
+  if(dx < 0) el.style.transform = `translateX(${Math.max(dx, -80)}px)`;
+}
+function swipeEnd(e, el, id){
+  el.classList.remove('swiping');
+  const dx = e.changedTouches[0].clientX - _swipeStartX;
+  if(dx < -60) confirmDelete(el, id);
+  else el.style.transform = 'translateX(0)';
+}
+
+// Mouse drag (desktop)
+function mouseSwipeStart(e, el){
+  if(e.target.closest('button')) return;
+  const startX = e.clientX;
+  el.classList.add('swiping');
+  function onMove(ev){
+    const dx = ev.clientX - startX;
+    if(dx < 0) el.style.transform = `translateX(${Math.max(dx, -80)}px)`;
+  }
+  function onUp(ev){
+    el.classList.remove('swiping');
+    const dx = ev.clientX - startX;
+    if(dx < -60) confirmDelete(el, el.dataset.id);
+    else el.style.transform = 'translateX(0)';
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+function confirmDelete(el, id){
+  el.style.transform = 'translateX(-80px)';
+  setTimeout(()=>{
+    el.style.transition = 'transform .3s, opacity .3s';
+    el.style.transform = 'translateX(-120%)';
+    el.style.opacity = '0';
+    setTimeout(()=> removeQ(id), 300);
+  }, 600);
 }
 
 
