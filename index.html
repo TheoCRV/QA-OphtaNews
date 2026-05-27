@@ -363,10 +363,17 @@ body[data-view="admin"] #btn-back-public { display: block }
  </div>
  </div>
 
+ <div class="stage-center">
+   <div id="stage-live" style="display:none">
+     <div id="stage-question"></div>
+   </div>
+   <div id="stage-empty">
+     <div class="t1">Aucune question sélectionnée</div>
+     <div class="t2">Choisissez une question dans le panneau de modération</div>
+   </div>
+ </div>
 
-
- 
-  <div style="text-align:center;padding:16px 0 8px;font-size:10px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;font-family:var(--sans)">Powered by FMC</div>
+ <p style="text-align:center;margin-top:16px;font-size:10px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase">Powered by FMC</p>
 </div>
 
 <script>
@@ -381,10 +388,6 @@ window._questions = [];
 
 // Render (appelé par Firebase listener) 
 window._render = function() {
- // sync dot
- const dot = document.getElementById('sync-dot');
- if (dot) dot.classList.remove('off');
-
  if (currentView === 'admin') renderAdmin();
  if (currentView === 'stage') renderStage();
 };
