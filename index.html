@@ -24,8 +24,7 @@
     window.highlightedId = snap.val() || null;
     const btn = document.getElementById('btn-clear');
     if(btn) btn.style.display = window.highlightedId ? '' : 'none';
-    if(window.currentView === 'admin') window.renderAdmin && window.renderAdmin();
-    if(window.currentView === 'stage') window.renderStage && window.renderStage();
+    if(window._render) window._render();
   });
 </script>
 <style>
@@ -262,8 +261,6 @@ window._render = function(){
   if(currentView === 'admin') renderAdmin();
   if(currentView === 'stage') renderStage();
 };
-window.renderAdmin = renderAdmin;
-window.renderStage = renderStage;
 
 // Logo tap
 let tapCount=0, tapTimer=null;
