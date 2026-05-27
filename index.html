@@ -209,7 +209,6 @@ textarea.inp { resize:vertical }
       <div class="section-list" id="list-rejected"  style="display:none"></div>
     </div>
 
-    <p class="footer-txt" style="margin-top:32px">Powered by FMC</p>
   </div>
 </div>
 
@@ -239,8 +238,8 @@ textarea.inp { resize:vertical }
 </div>
 
 <!-- Footer fixe -->
-<div style="position:fixed;bottom:0;left:0;right:0;z-index:100;pointer-events:none">
-  <div id="btn-back-public" style="text-align:center;padding:6px;pointer-events:all">
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:100;pointer-events:none;text-align:center;padding-bottom:8px">
+  <div id="btn-back-public" style="pointer-events:all;margin-bottom:6px">
     <button onclick="sessionStorage.removeItem('qa_admin');switchView('public')"
       style="background:var(--card);border:1px solid var(--border);color:var(--muted);
       font-family:var(--sans);font-size:11px;letter-spacing:.08em;padding:7px 16px;
@@ -248,6 +247,7 @@ textarea.inp { resize:vertical }
       ← Page question
     </button>
   </div>
+  <p style="font-size:10px;color:rgba(255,255,255,.2);letter-spacing:.15em;text-transform:uppercase;font-family:var(--sans)">Powered by FMC</p>
 </div>
 
 <script>
